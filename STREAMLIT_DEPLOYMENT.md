@@ -63,23 +63,27 @@ GOOGLE_API_KEY = "your_actual_google_api_key_here"
 
 ### Common Issues
 
-1. **SQLite Version Error**
+1. **Dependency Conflicts**
+   - **Fixed**: Simplified requirements.txt to avoid pydantic/chromadb conflicts
+   - Uses minimal dependencies for better compatibility
+
+2. **SQLite Version Error**
    - **Fixed**: The app now includes `pysqlite3-binary` and SQLite version fixes
    - If you still see SQLite errors, ensure `pysqlite3-binary` is in requirements.txt
 
-2. **API Key Error**
+3. **API Key Error**
    - The API key is hardcoded in the app, so this should not occur
    - If you need to change the API key, edit `app.py` line 51
 
-3. **Import Errors**
+4. **Import Errors**
    - Verify all dependencies are in `requirements.txt`
    - Check that all Python files are properly structured
 
-4. **Data Loading Issues**
+5. **Data Loading Issues**
    - Ensure all data files are committed to your repository
    - Check file paths in your code
 
-5. **Memory Issues**
+6. **Memory Issues**
    - Increase memory allocation in Streamlit Cloud settings
    - Consider optimizing your vector database size
 
