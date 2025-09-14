@@ -47,7 +47,7 @@ def main():
     ui_components = UIComponents()
     analytics_dashboard = AnalyticsDashboard()
     
-    # Set API key
+    # Set API key (hardcoded for deployment)
     api_key = "AIzaSyBUdEgO4KT3HLN1qAvtJYCod3eCOw8Q_LU"
     if not st.session_state.get("api_key"):
         st.session_state.api_key = api_key
