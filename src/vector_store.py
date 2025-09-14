@@ -41,9 +41,11 @@ class VectorStore:
         
         # Initialize ChromaDB
         os.makedirs(persist_directory, exist_ok=True)
-        self.client = chromadb.PersistentClient(
-            path=persist_directory,
-            settings=Settings(anonymized_telemetry=False)
+        self.client = chromadb.Client(
+            Settings(
+                persist_directory=persist_directory,
+                anonymized_telemetry=False
+            )
         )
         
         # Create or get collection
