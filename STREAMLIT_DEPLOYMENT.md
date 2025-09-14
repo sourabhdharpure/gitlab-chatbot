@@ -63,19 +63,23 @@ GOOGLE_API_KEY = "your_actual_google_api_key_here"
 
 ### Common Issues
 
-1. **API Key Error**
-   - Ensure your Google API key is correctly set in Streamlit secrets
-   - Check that the API key has the necessary permissions
+1. **SQLite Version Error**
+   - **Fixed**: The app now includes `pysqlite3-binary` and SQLite version fixes
+   - If you still see SQLite errors, ensure `pysqlite3-binary` is in requirements.txt
 
-2. **Import Errors**
+2. **API Key Error**
+   - The API key is hardcoded in the app, so this should not occur
+   - If you need to change the API key, edit `app.py` line 51
+
+3. **Import Errors**
    - Verify all dependencies are in `requirements.txt`
    - Check that all Python files are properly structured
 
-3. **Data Loading Issues**
+4. **Data Loading Issues**
    - Ensure all data files are committed to your repository
    - Check file paths in your code
 
-4. **Memory Issues**
+5. **Memory Issues**
    - Increase memory allocation in Streamlit Cloud settings
    - Consider optimizing your vector database size
 

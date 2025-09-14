@@ -2,6 +2,14 @@
 Vector store implementation for efficient similarity search and retrieval.
 """
 
+# Fix SQLite version issue for ChromaDB
+import sys
+try:
+    import pysqlite3
+    sys.modules['sqlite3'] = pysqlite3
+except ImportError:
+    pass
+
 import os
 import json
 import numpy as np

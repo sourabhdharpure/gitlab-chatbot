@@ -2,6 +2,14 @@
 GitLab AI Chatbot - Simple and Functional
 """
 
+# Fix SQLite version issue for ChromaDB
+import sys
+try:
+    import pysqlite3
+    sys.modules['sqlite3'] = pysqlite3
+except ImportError:
+    pass
+
 import streamlit as st
 import os
 from components.chatbot_manager import ChatbotManager
