@@ -1,0 +1,12 @@
+# API Keys
+GOOGLE_API_KEY=AIzaSyBUdEgO4KT3HLN1qAvtJYCod3eCOw8Q_LU
+OPENAI_API_KEY=your_openai_api_key_here
+
+# App Configuration
+APP_TITLE=GitLab AI Assistant
+MAX_TOKENS=2048
+TEMPERATURE=0.7
+
+# Data Sources
+GITLAB_HANDBOOK_URL=https://about.gitlab.com/handbook/
+GITLAB_DIRECTION_URL=https://about.gitlab.com/direction/
