@@ -8,7 +8,6 @@ import logging
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime
 import google.generativeai as genai
-import openai
 from dataclasses import dataclass
 import re
 
@@ -82,15 +81,9 @@ class GitLabChatbot:
         self.memory = ConversationMemory()
         self.model_type = model_type
         
-        # Configure LLM
-        if model_type == "gemini":
-            genai.configure(api_key=api_key)
-            self.model = genai.GenerativeModel('gemini-1.5-flash')
-        elif model_type == "openai":
-            openai.api_key = api_key
-            self.model_name = "gpt-3.5-turbo"
-        else:
-            raise ValueError(f"Unsupported model type: {model_type}")
+        # Configure LLM (Gemini only)
+        genai.configure(api_key=api_key)
+        self.model = genai.GenerativeModel('gemini-1.5-flash')
         
         logger.info(f"Initialized GitLab chatbot with {model_type} model")
     
@@ -154,19 +147,6 @@ Answer naturally and conversationally about GitLab. Don't mention any sources, d
             logger.error(f"Error generating Gemini response: {e}")
             return "I apologize, but I'm having trouble generating a response right now. Please try again."
     
-    def generate_response_openai(self, prompt: str) -> str:
-        """Generate response using OpenAI."""
-        try:
-            response = openai.ChatCompletion.create(
-                model=self.model_name,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.7,
-                max_tokens=1024
-            )
-            return response.choices[0].message.content
-        except Exception as e:
-            logger.error(f"Error generating OpenAI response: {e}")
-            return "I apologize, but I'm having trouble generating a response right now. Please try again."
     
     def is_gitlab_related(self, query: str) -> bool:
         """Check if query is related to GitLab."""
@@ -219,11 +199,8 @@ Answer naturally and conversationally about GitLab. Don't mention any sources, d
         # Create prompt with enhanced GitLab context
         prompt = self.create_prompt(processed_query, context_docs, conversation_context)
         
-        # Generate response
-        if self.model_type == "gemini":
-            response = self.generate_response_gemini(prompt)
-        else:
-            response = self.generate_response_openai(prompt)
+        # Generate response using Gemini
+        response = self.generate_response_gemini(prompt)
         
         # Store in memory
         source_docs = [doc['metadata'] for doc in context_docs]
@@ -387,14 +364,9 @@ def create_chatbot_from_config(config_path: str = "config.json") -> GitLabChatbo
         config = default_config
     
     # Get API key from environment
-    if config['model_type'] == "gemini":
-        api_key = os.getenv('GOOGLE_API_KEY')
-        if not api_key:
-            raise ValueError("GOOGLE_API_KEY environment variable not set")
-    else:
-        api_key = os.getenv('OPENAI_API_KEY')
-        if not api_key:
-            raise ValueError("OPENAI_API_KEY environment variable not set")
+    api_key = os.getenv('GOOGLE_API_KEY')
+    if not api_key:
+        raise ValueError("GOOGLE_API_KEY environment variable not set")
     
     # Initialize vector store
     vector_store = VectorStore(persist_directory=config['vector_store_path'])
