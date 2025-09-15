@@ -1,12 +1,12 @@
 {
-  "total_queries": 101,
+  "total_queries": 102,
   "cache_hits": 8,
-  "cache_misses": 93,
-  "total_response_time": 264.85675829804984,
+  "cache_misses": 94,
+  "total_response_time": 273.7070022980498,
   "errors": 0,
   "start_time": "2025-09-14T13:54:52.401701",
-  "total_input_tokens": 11179,
-  "total_output_tokens": 5768,
-  "total_tokens": 16947,
-  "total_cost_usd": 0.10243382500000002
+  "total_input_tokens": 11225,
+  "total_output_tokens": 5775,
+  "total_tokens": 17000,
+  "total_cost_usd": 0.10243937500000003
 }

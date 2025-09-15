@@ -500,5 +500,26 @@
       }
     },
     "timestamp": 1757944004.689638
+  },
+  "1096071b13daf202f3973ccbd0021d08": {
+    "response": "MR stands for Merge Request.\n",
+    "sources": [
+      {
+        "title": "The Handbook | The GitLab Handbook",
+        "url": "https://about.gitlab.com/handbook/",
+        "source_url": "https://about.gitlab.com/handbook/"
+      }
+    ],
+    "metadata": {
+      "type": "ai_generated",
+      "context_docs_count": 1,
+      "token_info": {
+        "input_tokens": 46,
+        "output_tokens": 7,
+        "total_tokens": 53,
+        "cost_usd": 5.549999999999999e-06
+      }
+    },
+    "timestamp": 1757951340.125506
   }
 }

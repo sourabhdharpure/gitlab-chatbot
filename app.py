@@ -43,7 +43,7 @@ def main():
     load_app_styles()
 
     # Get API key (hardcoded with environment variable fallback)
-    api_key = os.getenv("GOOGLE_API_KEY", "AIzaSyCB1kGPxF-JqBmDrpQA8MDeyVNC29hNyn0")
+    api_key = os.getenv("GOOGLE_API_KEY", "AIzaSyBUdEgO4KT3HLN1qAvtJYCod3eCOw8Q_LU")
     if not api_key:
         st.error("🔑 Google API Key not found!")
         st.info("Please set the GOOGLE_API_KEY environment variable or add it to your Streamlit secrets.")
