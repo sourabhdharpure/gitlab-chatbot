@@ -1,0 +1,349 @@
+/* ===== CSS VARIABLES ===== */
+:root {
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --primary-light: #dbeafe;
+    --text-primary: #111827;
+    --text-secondary: #374151;
+    --text-muted: #6b7280;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f9fafb;
+    --bg-tertiary: #f3f4f6;
+    --border: #e5e7eb;
+    --border-strong: #d1d5db;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --radius: 8px;
+    --radius-lg: 12px;
+}
+
+/* ===== HIDE STREAMLIT ELEMENTS ===== */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+.stDeployButton {display: none;}
+div[data-testid="stToolbar"] {display: none;}
+
+/* ===== BASE LAYOUT ===== */
+.stApp {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--text-primary);
+    min-height: 100vh;
+}
+
+main .block-container {
+    background: transparent;
+    color: var(--text-primary);
+    padding: 2rem 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ===== TYPOGRAPHY ===== */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary) !important;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+h1 {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+p, div, span, li, td, th, label {
+    color: var(--text-primary) !important;
+    line-height: 1.6;
+}
+
+/* ===== CHAT INTERFACE ===== */
+.stChatMessage {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin: 1rem 0;
+    box-shadow: var(--shadow);
+    color: var(--text-primary) !important;
+    transition: all 0.2s ease;
+}
+
+.stChatMessage:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-1px);
+}
+
+.stChatMessage[data-testid="chatAvatarIcon-user"] {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+    color: white !important;
+    border: none;
+}
+
+.stChatMessage[data-testid="chatAvatarIcon-user"] * {
+    color: white !important;
+}
+
+.stChatMessage[data-testid="chatAvatarIcon-assistant"] {
+    background: var(--bg-primary);
+    border-left: 4px solid var(--primary);
+    color: var(--text-primary) !important;
+}
+
+/* ===== CHAT INPUT ===== */
+.stChatInputContainer {
+    background: var(--bg-primary);
+    border: 2px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    transition: all 0.2s ease;
+}
+
+.stChatInputContainer:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+div[data-testid="stChatInput"] input {
+    background: transparent !important;
+    color: var(--text-primary) !important;
+    border: none !important;
+    font-size: 1rem !important;
+    padding: 1rem !important;
+}
+
+div[data-testid="stChatInput"] input::placeholder {
+    color: var(--text-muted) !important;
+}
+
+/* ===== BUTTONS ===== */
+.stButton > button {
+    background: var(--primary) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: var(--radius) !important;
+    padding: 0.75rem 1.5rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    box-shadow: var(--shadow) !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+}
+
+.stButton > button:hover {
+    background: var(--primary-hover) !important;
+    color: white !important;
+    transform: translateY(-1px) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+.stButton > button:focus,
+.stButton > button:active {
+    background: var(--primary-hover) !important;
+    color: white !important;
+    outline: 2px solid var(--primary-light) !important;
+    outline-offset: 2px !important;
+}
+
+/* Small buttons */
+.stButton > button[data-testid="baseButton-secondary"] {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-secondary) !important;
+    border: 1px solid var(--border-strong) !important;
+    font-size: 0.75rem !important;
+    padding: 0.5rem 1rem !important;
+    font-weight: 400 !important;
+}
+
+.stButton > button[data-testid="baseButton-secondary"]:hover {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    transform: none !important;
+    box-shadow: var(--shadow) !important;
+}
+
+/* ===== FORMS & INPUTS ===== */
+input[type="text"], 
+input[type="email"], 
+input[type="password"], 
+textarea,
+select {
+    background: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-strong) !important;
+    border-radius: var(--radius) !important;
+    padding: 0.75rem !important;
+    font-size: 0.875rem !important;
+    transition: all 0.2s ease !important;
+}
+
+input:focus, 
+textarea:focus, 
+select:focus {
+    border-color: var(--primary) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px var(--primary-light) !important;
+}
+
+/* ===== SELECTBOX ===== */
+.stSelectbox > div > div {
+    background: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-strong) !important;
+    border-radius: var(--radius) !important;
+}
+
+/* ===== SIDEBAR ===== */
+.css-1d391kg {
+    background: var(--bg-primary) !important;
+    border-right: 1px solid var(--border) !important;
+}
+
+.css-1d391kg * {
+    color: var(--text-primary) !important;
+}
+
+/* ===== EXPANDERS ===== */
+.streamlit-expanderHeader {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    padding: 0.75rem 1rem !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+}
+
+.streamlit-expanderHeader:hover {
+    background: var(--bg-tertiary) !important;
+}
+
+.streamlit-expanderContent {
+    background: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border) !important;
+    border-top: none !important;
+    border-radius: 0 0 var(--radius) var(--radius) !important;
+    padding: 1rem !important;
+}
+
+/* ===== ALERTS ===== */
+.stAlert {
+    border-radius: var(--radius) !important;
+    border: none !important;
+    box-shadow: var(--shadow) !important;
+    margin: 1rem 0 !important;
+}
+
+.stSuccess {
+    background: #f0fdf4 !important;
+    color: #15803d !important;
+    border-left: 4px solid var(--success) !important;
+}
+
+.stWarning {
+    background: #fffbeb !important;
+    color: #a16207 !important;
+    border-left: 4px solid var(--warning) !important;
+}
+
+.stError {
+    background: #fef2f2 !important;
+    color: #dc2626 !important;
+    border-left: 4px solid var(--error) !important;
+}
+
+.stInfo {
+    background: #eff6ff !important;
+    color: #1d4ed8 !important;
+    border-left: 4px solid var(--primary) !important;
+}
+
+/* ===== CODE BLOCKS ===== */
+.stMarkdown code {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+    padding: 0.25rem 0.5rem !important;
+    border-radius: 4px !important;
+    font-size: 0.875em !important;
+    border: 1px solid var(--border) !important;
+}
+
+.stMarkdown pre {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    padding: 1rem !important;
+    overflow-x: auto !important;
+}
+
+/* ===== SPINNER ===== */
+.stSpinner {
+    color: var(--primary) !important;
+}
+
+/* ===== UTILITY CLASSES ===== */
+.small-text {
+    font-size: 0.875rem !important;
+    color: var(--text-secondary) !important;
+    line-height: 1.5 !important;
+}
+
+.feedback-form {
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    padding: 1rem !important;
+    margin: 0.5rem 0 !important;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    main .block-container {
+        padding: 1rem 0.5rem;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    .stChatMessage {
+        padding: 1rem;
+    }
+}
+
+/* ===== FORCE TEXT VISIBILITY ===== */
+* {
+    color: inherit;
+}
+
+/* Ensure all text elements are visible */
+h1, h2, h3, h4, h5, h6, p, div, span, li, td, th, label, .stMarkdown {
+    color: var(--text-primary) !important;
+}
+
+/* Button text visibility */
+.stButton > button *, 
+.stButton > button {
+    color: white !important;
+}
+
+.stButton > button[data-testid="baseButton-secondary"] *,
+.stButton > button[data-testid="baseButton-secondary"] {
+    color: var(--text-secondary) !important;
+}
+
+.stButton > button[data-testid="baseButton-secondary"]:hover *,
+.stButton > button[data-testid="baseButton-secondary"]:hover {
+    color: var(--text-primary) !important;
+}

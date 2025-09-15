@@ -1,110 +1,152 @@
-"""
-GitLab AI Chatbot - Simple and Functional
-"""
-
-# Fix SQLite version issue for ChromaDB
+# Import necessary libraries
+import os
 import sys
+
+# Fix for sqlite3 version issues on Streamlit Cloud
 try:
-    import pysqlite3
-    sys.modules['sqlite3'] = pysqlite3
+    __import__('pysqlite3')
+    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 except ImportError:
+    # pysqlite3 not available, use system sqlite3
     pass
 
 import streamlit as st
 import os
+from datetime import datetime
+from typing import Dict, List, Optional
+
+# Import custom components
 from components.chatbot_manager import ChatbotManager
 from components.performance_monitor import PerformanceMonitor
 from components.cache_manager import CacheManager
 from components.ui_components import UIComponents
 from components.analytics_dashboard import AnalyticsDashboard
+from components.smart_suggestions import SmartSuggestions
+from components.transparency_guardrails import TransparencyGuardrails
+from components.tech_doc_viewer import TechDocViewer
+
+# Import utilities
+from utils.css_loader import load_app_styles
 
 def main():
+    """Main application function."""
+    
+    # Set page config
     st.set_page_config(
         page_title="GitLab AI Assistant",
+        page_icon="🤖",
         layout="wide",
         initial_sidebar_state="expanded"
     )
 
-    # Add CSS to ensure sidebar is always accessible
-    st.markdown("""
-    <style>
-    /* Force sidebar to be visible */
-    .css-1d391kg {
-        display: block !important;
-        visibility: visible !important;
-    }
-    
-    /* Ensure sidebar is always shown */
-    .sidebar .sidebar-content {
-        display: block !important;
-        visibility: visible !important;
-    }
-    
-    /* Make sure sidebar doesn't get hidden */
-    [data-testid="stSidebar"] {
-        display: block !important;
-        visibility: visible !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+    # Load application styles
+    load_app_styles()
 
-    # Initialize components
-    chatbot_manager = ChatbotManager()
-    performance_monitor = PerformanceMonitor()
-    cache_manager = CacheManager()
-    ui_components = UIComponents()
-    analytics_dashboard = AnalyticsDashboard()
+    # Get API key (hardcoded with environment variable fallback)
+    api_key = os.getenv("GOOGLE_API_KEY", "AIzaSyCB1kGPxF-JqBmDrpQA8MDeyVNC29hNyn0")
+    if not api_key:
+        st.error("🔑 Google API Key not found!")
+        st.info("Please set the GOOGLE_API_KEY environment variable or add it to your Streamlit secrets.")
+        st.code("export GOOGLE_API_KEY=your_actual_api_key_here", language="bash")
+        st.stop()
     
-    # Set API key (hardcoded for deployment)
-    api_key = "AIzaSyBUdEgO4KT3HLN1qAvtJYCod3eCOw8Q_LU"
-    if not st.session_state.get("api_key"):
-        st.session_state.api_key = api_key
-        os.environ["GOOGLE_API_KEY"] = api_key
-    
-    # Initialize chatbot
-    if st.session_state.get("api_key") and not st.session_state.get('chatbot_ready', False):
-        with st.spinner("Initializing..."):
-            if chatbot_manager.initialize_chatbot(st.session_state.get("api_key")):
-                st.session_state.chatbot_ready = True
-                st.rerun()
-    
-    # Sidebar
-    with st.sidebar:
-        st.title("GitLab AI Assistant")
-        st.markdown("---")
+    # Initialize components with caching for performance
+    @st.cache_resource
+    def initialize_components(api_key):
+        """Initialize all components with caching for better performance."""
+        cache_manager = CacheManager()
+        chatbot_manager = ChatbotManager(api_key, cache_manager)
+        performance_monitor = PerformanceMonitor()
+        ui_components = UIComponents()
+        analytics_dashboard = AnalyticsDashboard()
+        smart_suggestions = SmartSuggestions()
+        transparency_guardrails = TransparencyGuardrails()
+        tech_doc_viewer = TechDocViewer()
         
-        if st.button("Analytics Dashboard"):
-            st.session_state.show_analytics = True
-            st.rerun()
+        # Initialize chatbot
+        if not chatbot_manager.initialize_chatbot():
+            st.error("Failed to initialize chatbot. Please check the configuration.")
+            st.stop()
         
-        if st.button("Back to Chat"):
+        return (chatbot_manager, performance_monitor, cache_manager, ui_components, 
+                analytics_dashboard, smart_suggestions, transparency_guardrails, tech_doc_viewer)
+    
+    # Fast initialization with caching
+    (chatbot_manager, performance_monitor, cache_manager, ui_components, 
+     analytics_dashboard, smart_suggestions, transparency_guardrails, tech_doc_viewer) = initialize_components(api_key)
+    
+    # Initialize session state flags
+    if "show_chat" not in st.session_state:
+        st.session_state.show_chat = True
+    if "show_analytics" not in st.session_state:
+        st.session_state.show_analytics = False
+    if "show_guardrails" not in st.session_state:
+        st.session_state.show_guardrails = False
+    if "show_docs" not in st.session_state:
+        st.session_state.show_docs = False
+
+    # Top navigation
+    st.title("GitLab AI Assistant")
+    st.markdown("*Your intelligent companion for all things GitLab*")
+    
+    # Navigation buttons
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        if st.button("Chat", type="primary" if st.session_state.show_chat else "secondary"):
+            st.session_state.show_chat = True
             st.session_state.show_analytics = False
+            st.session_state.show_guardrails = False
+            st.session_state.show_docs = False
             st.rerun()
     
-    # Main content
-    if st.session_state.get('chatbot_ready', False):
-        # Add menu options at the top
-        col1, col2, col3 = st.columns([1, 1, 4])
+    with col2:
+        if st.button("Analytics", type="primary" if st.session_state.show_analytics else "secondary"):
+            st.session_state.show_chat = False
+            st.session_state.show_analytics = True
+            st.session_state.show_guardrails = False
+            st.session_state.show_docs = False
+            st.rerun()
+    
+    with col3:
+        if st.button("Guardrails", type="primary" if st.session_state.show_guardrails else "secondary"):
+            st.session_state.show_chat = False
+            st.session_state.show_analytics = False
+            st.session_state.show_guardrails = True
+            st.session_state.show_docs = False
+            st.rerun()
+    
+    with col4:
+        if st.button("Docs", type="primary" if st.session_state.show_docs else "secondary"):
+            st.session_state.show_chat = False
+            st.session_state.show_analytics = False
+            st.session_state.show_guardrails = False
+            st.session_state.show_docs = True
+            st.rerun()
+
+    # Sidebar with smart suggestions
+    smart_suggestions.render_suggestions_sidebar()
+
+    # Main content based on navigation
+    if st.session_state.show_chat:
+        # Enhanced chat interface
+        ui_components.render_enhanced_chat(
+            chatbot_manager,
+            performance_monitor,
+            cache_manager,
+            smart_suggestions,
+            transparency_guardrails
+        )
         
-        with col1:
-            if st.button("📊 Analytics", help="View Analytics Dashboard"):
-                st.session_state.show_analytics = True
-                st.rerun()
+    elif st.session_state.show_analytics:
+        analytics_dashboard.render_dashboard(performance_monitor)
         
-        with col2:
-            if st.button("💬 Chat", help="Back to Chat"):
-                st.session_state.show_analytics = False
-                st.rerun()
+    elif st.session_state.show_guardrails:
+        transparency_guardrails.render_learning_dashboard()
         
-        with col3:
-            st.write("")  # Empty space
-        
-        if st.session_state.get('show_analytics', False):
-            analytics_dashboard.render_dashboard(performance_monitor, chatbot_manager)
-        else:
-            ui_components.render_simple_chat(chatbot_manager, performance_monitor, cache_manager)
-    else:
-        st.info("Initializing GitLab AI Assistant...")
+    elif st.session_state.show_docs:
+        # Documentation viewer
+        tech_doc_viewer.render_documentation_viewer()
 
 if __name__ == "__main__":
     main()

@@ -260,20 +260,20 @@ def display_data_status_dashboard():
         persistence_manager = get_persistence_manager()
         data_status = persistence_manager.get_data_status()
         
-        st.sidebar.markdown("### 💾 Data Status")
+        st.sidebar.markdown("### Data Status")
         
         # Overall status
         app_state = data_status.get('app_state', {})
         
         if app_state.get('data_sources_loaded', False):
-            st.sidebar.success("✅ Data sources loaded")
+            st.sidebar.success("Data sources loaded")
         else:
-            st.sidebar.warning("⚠️ Data sources need verification")
+            st.sidebar.warning("Data sources need verification")
         
         if app_state.get('cache_initialized', False):
-            st.sidebar.success("✅ Caches initialized")
+            st.sidebar.success("Caches initialized")
         else:
-            st.sidebar.info("ℹ️ Caches will be built on first use")
+            st.sidebar.info("Caches will be built on first use")
         
         # Data size info
         total_size = data_status.get('total_size_mb', 0)

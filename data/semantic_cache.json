@@ -234,5 +234,271 @@
       "system_prompt": "You are a GitLab AI Assistant focused exclusively on GitLab's products, culture, processes, and practices. Your expertise covers:\n\n- GitLab Handbook, Direction, and company culture\n- GitLab CI/CD pipelines, workflows, and DevOps practices  \n- GitLab project management, issues, and merge requests\n- GitLab security, compliance, and best practices\n- GitLab platform features and capabilities\n- GitLab team collaboration and communication\n\nAlways maintain GitLab context in your responses. If a question is ambiguous or off-topic, gently guide users back to GitLab-related topics."
     },
     "timestamp": 1757843350.724854
+  },
+  "f525f4715a0adbcd5a29f6c72d9b798c": {
+    "response": "GitLab is a complete DevOps platform that provides a single application for the entire software development lifecycle. We're a fully remote company with team members in over 65 countries. GitLab offers source code management, CI/CD, security scanning, project management, and more - all in one platform. Our core values are Results, Efficiency, Diversity, Iteration, and Transparency.",
+    "sources": [],
+    "metadata": {
+      "type": "template"
+    },
+    "timestamp": 1757943680.819268
+  },
+  "051901fae8539ed0d4b78d1732367e83": {
+    "response": "GitLab's core values are Results, Efficiency, Diversity, Iteration, and Transparency. These values guide everything we do, from how we work remotely to how we develop software. We believe in results over hours worked, efficiency through automation, diversity in all forms, iteration over perfection, and transparency in everything we do.",
+    "sources": [],
+    "metadata": {
+      "type": "template"
+    },
+    "timestamp": 1757943686.934093
+  },
+  "22594f99e40365cbcf8dc0a0f7ff3e75": {
+    "response": "GitLab is a fully remote company with team members in over 65 countries. We believe in asynchronous communication, transparency, and results-oriented work. Our remote work culture emphasizes trust, clear documentation, and making work visible to everyone. We use GitLab itself for most of our work processes.",
+    "sources": [],
+    "metadata": {
+      "type": "template"
+    },
+    "timestamp": 1757943691.536896
+  },
+  "829a3a378ba32c28a432ce382d15a982": {
+    "response": "GitLab's core values are Results, Efficiency, Diversity, Iteration, and Transparency. These values guide everything we do, from how we work remotely to how we develop software. We believe in results over hours worked, efficiency through automation, diversity in all forms, iteration over perfection, and transparency in everything we do.",
+    "sources": [],
+    "metadata": {
+      "type": "template"
+    },
+    "timestamp": 1757943701.162669
+  },
+  "9b5646b51a74bdddd76d8c77d7d69ae0": {
+    "response": "GitLab's core values are Results, Efficiency, Diversity, Iteration, and Transparency. These values guide everything we do, from how we work remotely to how we develop software. We believe in results over hours worked, efficiency through automation, diversity in all forms, iteration over perfection, and transparency in everything we do.",
+    "sources": [],
+    "metadata": {
+      "type": "template"
+    },
+    "timestamp": 1757943712.619358
+  },
+  "0b1e3c9ca31e18d7817d94643383c242": {
+    "response": "I am GitLab's AI assistant, here to answer your questions about GitLab, based on information available to me, including the GitLab Handbook.\n",
+    "sources": [
+      {
+        "title": "The Handbook | The GitLab Handbook",
+        "url": "https://about.gitlab.com/handbook/",
+        "source_url": "https://about.gitlab.com/handbook/"
+      }
+    ],
+    "metadata": {
+      "type": "ai_generated",
+      "context_docs_count": 1,
+      "token_info": {
+        "input_tokens": 54,
+        "output_tokens": 32,
+        "total_tokens": 86,
+        "cost_usd": 1.365e-05
+      }
+    },
+    "timestamp": 1757943750.279289
+  },
+  "c08e4c822c6337da4f91218fd3706ea8": {
+    "response": "GitLab CI/CD is our built-in continuous integration and deployment tool. It uses YAML configuration files (.gitlab-ci.yml) to define pipelines that automatically build, test, and deploy your code. Pipelines run in stages (build, test, deploy) and can be triggered by commits, merge requests, or schedules.",
+    "sources": [],
+    "metadata": {
+      "type": "template"
+    },
+    "timestamp": 1757943755.222433
+  },
+  "380dafee1701695cba7334948941c44f": {
+    "response": "GitLab CI/CD is our built-in continuous integration and deployment tool. It uses YAML configuration files (.gitlab-ci.yml) to define pipelines that automatically build, test, and deploy your code. Pipelines run in stages (build, test, deploy) and can be triggered by commits, merge requests, or schedules.",
+    "sources": [],
+    "metadata": {
+      "type": "template"
+    },
+    "timestamp": 1757943772.881359
+  },
+  "5be10e10a1f937de039fc7c8912f6fa3": {
+    "response": "GitLab offers a comprehensive suite of security features, including Static Application Security Testing (SAST), Dynamic Application Security Testing (DAST), Software Composition Analysis (SCA), Dependency Scanning, Container Scanning, Secret Detection, and Vulnerability Management.  It also provides security dashboards and reporting.\n",
+    "sources": [
+      {
+        "title": "Product Section Direction - Security\n|\nGitLab",
+        "url": "https://about.gitlab.com/direction/security/",
+        "source_url": "https://about.gitlab.com/direction/security/"
+      }
+    ],
+    "metadata": {
+      "type": "ai_generated",
+      "context_docs_count": 1,
+      "token_info": {
+        "input_tokens": 51,
+        "output_tokens": 56,
+        "total_tokens": 107,
+        "cost_usd": 2.0624999999999996e-05
+      }
+    },
+    "timestamp": 1757943796.051137
+  },
+  "e84923d09d4dcba0551db41167adfbcb": {
+    "response": "Compliance involves meeting various industry regulations and standards like SOC 2, ISO 27001, HIPAA, GDPR, etc., depending on the specific Security features and customer needs.\n",
+    "sources": [
+      {
+        "title": "Product Section Direction - Security\n|\nGitLab",
+        "url": "https://about.gitlab.com/direction/security/",
+        "source_url": "https://about.gitlab.com/direction/security/"
+      }
+    ],
+    "metadata": {
+      "type": "ai_generated",
+      "context_docs_count": 1,
+      "token_info": {
+        "input_tokens": 52,
+        "output_tokens": 38,
+        "total_tokens": 90,
+        "cost_usd": 1.53e-05
+      }
+    },
+    "timestamp": 1757943820.36265
+  },
+  "419c20c3e5ad5bd97d5f5e641973a018": {
+    "response": "No.  GitLab and GitHub are different companies offering similar but distinct services.  GitLab is a complete DevOps platform, while GitHub primarily focuses on code hosting and collaboration.\n",
+    "sources": [
+      {
+        "title": "The Handbook | The GitLab Handbook",
+        "url": "https://about.gitlab.com/handbook/",
+        "source_url": "https://about.gitlab.com/handbook/"
+      }
+    ],
+    "metadata": {
+      "type": "ai_generated",
+      "context_docs_count": 1,
+      "token_info": {
+        "input_tokens": 48,
+        "output_tokens": 36,
+        "total_tokens": 84,
+        "cost_usd": 1.44e-05
+      }
+    },
+    "timestamp": 1757943832.10738
+  },
+  "411ed21c6c90b30f13603a3f3e780cc1": {
+    "response": "GitHub's unique functionalities aren't explicitly defined in the GitLab Handbook.  To answer, I'd need to compare features outside the scope of that document.\n",
+    "sources": [
+      {
+        "title": "The Handbook | The GitLab Handbook",
+        "url": "https://about.gitlab.com/handbook/",
+        "source_url": "https://about.gitlab.com/handbook/"
+      }
+    ],
+    "metadata": {
+      "type": "ai_generated",
+      "context_docs_count": 1,
+      "token_info": {
+        "input_tokens": 47,
+        "output_tokens": 35,
+        "total_tokens": 82,
+        "cost_usd": 1.4024999999999999e-05
+      }
+    },
+    "timestamp": 1757943878.209259
+  },
+  "9bcccbb22205cc5d744ca048e4d91cee": {
+    "response": "GitLab's direction is defined by its vision, strategy, and roadmap, focusing on becoming the single application for the entire DevOps lifecycle.  This differs from competitors by offering a complete, integrated platform rather than a collection of disparate tools.\n",
+    "sources": [
+      {
+        "title": "GitLab Direction\n|\nGitLab",
+        "url": "https://about.gitlab.com/direction/",
+        "source_url": "https://about.gitlab.com/direction/"
+      }
+    ],
+    "metadata": {
+      "type": "ai_generated",
+      "context_docs_count": 1,
+      "token_info": {
+        "input_tokens": 60,
+        "output_tokens": 49,
+        "total_tokens": 109,
+        "cost_usd": 1.92e-05
+      }
+    },
+    "timestamp": 1757943921.130294
+  },
+  "e35bbfad0d26f6783798867eef63a708": {
+    "response": "Merge requests are proposals to merge changes from one branch into another, typically from a feature branch into the main branch.  They facilitate code review and collaboration.\n",
+    "sources": [
+      {
+        "title": "Verify:Pipeline Execution Group | The GitLab Handbook",
+        "url": "https://handbook.gitlab.com/handbook/engineering/devops/ops/verify/pipeline-execution/",
+        "source_url": "https://handbook.gitlab.com/handbook/engineering/devops/ops/verify/pipeline-execution/"
+      }
+    ],
+    "metadata": {
+      "type": "ai_generated",
+      "context_docs_count": 1,
+      "token_info": {
+        "input_tokens": 48,
+        "output_tokens": 32,
+        "total_tokens": 80,
+        "cost_usd": 1.32e-05
+      }
+    },
+    "timestamp": 1757943958.711503
+  },
+  "ba145100d5e39ccfc862ac364d34f61e": {
+    "response": "From your GitLab project, create a new branch, make your changes, commit them, then push the branch.  Navigate to your project's \"Merge requests\" section and create a new merge request, selecting your branch as the source.\n",
+    "sources": [
+      {
+        "title": "Verify:Pipeline Execution Group | The GitLab Handbook",
+        "url": "https://handbook.gitlab.com/handbook/engineering/devops/ops/verify/pipeline-execution/",
+        "source_url": "https://handbook.gitlab.com/handbook/engineering/devops/ops/verify/pipeline-execution/"
+      }
+    ],
+    "metadata": {
+      "type": "ai_generated",
+      "context_docs_count": 1,
+      "token_info": {
+        "input_tokens": 50,
+        "output_tokens": 50,
+        "total_tokens": 100,
+        "cost_usd": 1.875e-05
+      }
+    },
+    "timestamp": 1757943972.873525
+  },
+  "0c9973664ab6d85be79827d1318340ed": {
+    "response": "Please provide the command you'd like help with.  I need the context of *what* you want to do in GitLab to give you the correct command.\n",
+    "sources": [
+      {
+        "title": "GitLab Direction\n|\nGitLab",
+        "url": "https://about.gitlab.com/direction/",
+        "source_url": "https://about.gitlab.com/direction/"
+      }
+    ],
+    "metadata": {
+      "type": "ai_generated",
+      "context_docs_count": 1,
+      "token_info": {
+        "input_tokens": 61,
+        "output_tokens": 35,
+        "total_tokens": 96,
+        "cost_usd": 1.5074999999999999e-05
+      }
+    },
+    "timestamp": 1757943983.784556
+  },
+  "7f5b5e540d4f2a944378da48d16446e5": {
+    "response": "`git commit` saves changes to your local repository.  Use `-m \"your message\"` to add a commit message.\n",
+    "sources": [
+      {
+        "title": "GitLab Direction\n|\nGitLab",
+        "url": "https://about.gitlab.com/direction/",
+        "source_url": "https://about.gitlab.com/direction/"
+      }
+    ],
+    "metadata": {
+      "type": "ai_generated",
+      "context_docs_count": 1,
+      "token_info": {
+        "input_tokens": 54,
+        "output_tokens": 27,
+        "total_tokens": 81,
+        "cost_usd": 1.2149999999999999e-05
+      }
+    },
+    "timestamp": 1757944004.689638
   }
 }

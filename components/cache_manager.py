@@ -18,7 +18,7 @@ class SemanticCache:
         self.cache_file = cache_file
         self.cache = self._load_cache()
         self.max_size = 1000
-        self.similarity_threshold = 0.8
+        self.similarity_threshold = 0.85  # Increased for better matches
     
     def _load_cache(self) -> Dict:
         """Load cache from file."""
@@ -40,8 +40,16 @@ class SemanticCache:
             logger.error(f"Error saving cache: {e}")
     
     def _get_query_hash(self, query: str) -> str:
-        """Generate hash for query."""
-        return hashlib.md5(query.lower().strip().encode()).hexdigest()
+        """Generate hash for query with normalization for better cache hits."""
+        # Normalize query for better cache hits
+        normalized = query.lower().strip()
+        
+        # Remove common variations that don't affect meaning
+        import re
+        normalized = re.sub(r'\b(what|how|tell me|explain|can you|please)\b', '', normalized)
+        normalized = re.sub(r'\s+', ' ', normalized)  # Remove extra spaces
+        
+        return hashlib.md5(normalized.encode()).hexdigest()
     
     def get(self, query: str) -> Optional[Tuple[str, List, Dict]]:
         """Get cached response for query."""

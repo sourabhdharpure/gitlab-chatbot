@@ -23,21 +23,25 @@ logger = logging.getLogger(__name__)
 class ChatbotManager:
     """Manages chatbot initialization and operations."""
     
-    def __init__(self):
+    def __init__(self, api_key: str = None, cache_manager=None):
+        self.api_key = api_key
         self.chatbot = None
         self.vector_store = None
         self.context_manager = GitLabContextManager()
+        self.cache_manager = cache_manager
     
-    def initialize_chatbot(self, api_key: str) -> bool:
+    def initialize_chatbot(self, api_key: str = None) -> bool:
         """Initialize the chatbot with API key."""
         try:
-            if not api_key:
+            # Use provided API key or the one stored during initialization
+            effective_api_key = api_key or self.api_key
+            if not effective_api_key:
                 logger.error("No API key provided")
                 st.error("No API key provided")
                 return False
             
             # Set environment variable
-            os.environ["GOOGLE_API_KEY"] = api_key
+            os.environ["GOOGLE_API_KEY"] = effective_api_key
             logger.info("API key set in environment")
             
             # Build vector store
@@ -53,7 +57,7 @@ class ChatbotManager:
             # Create chatbot
             logger.info("Initializing AI Assistant...")
             try:
-                self.chatbot = create_chatbot_from_config()
+                self.chatbot = create_chatbot_from_config(cache_manager=self.cache_manager)
                 logger.info("Chatbot created successfully")
             except Exception as e:
                 logger.error(f"Error creating chatbot: {e}")

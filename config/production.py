@@ -1,0 +1,42 @@
+"""
+Production Configuration for GitLab Chatbot
+"""
+
+# Performance Settings
+MAX_CONCURRENT_REQUESTS = 10
+REQUEST_TIMEOUT = 30
+CACHE_TTL_HOURS = 24
+MAX_CACHE_SIZE = 1000
+
+# AI Model Settings
+MAX_OUTPUT_TOKENS = 256
+TEMPERATURE = 0.7
+TOP_P = 0.8
+TOP_K = 20
+
+# Response Settings
+MAX_RESPONSE_LENGTH = 500
+MIN_RESPONSE_LENGTH = 50
+
+# Caching Settings
+ENABLE_SEMANTIC_CACHE = True
+ENABLE_RESPONSE_CACHE = True
+CACHE_SIMILARITY_THRESHOLD = 0.85
+
+# Logging Settings
+LOG_LEVEL = "INFO"
+LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Error Handling
+MAX_RETRIES = 3
+RETRY_DELAY = 1.0
+
+# Security Settings
+ENABLE_RATE_LIMITING = True
+RATE_LIMIT_PER_MINUTE = 60
+ENABLE_INPUT_VALIDATION = True
+MAX_QUERY_LENGTH = 500
+
+# Monitoring
+ENABLE_METRICS = True
+METRICS_RETENTION_DAYS = 30

@@ -23,12 +23,18 @@ class QueryMetrics:
     """Stores metrics for a single query."""
     
     def __init__(self, query: str, response_time: float, cache_hit: bool, 
-                 confidence_score: float = 0.0, error: str = None):
+                 confidence_score: float = 0.0, error: str = None, 
+                 input_tokens: int = 0, output_tokens: int = 0, total_tokens: int = 0,
+                 cost_usd: float = 0.0):
         self.query = query
         self.response_time = response_time
         self.cache_hit = cache_hit
         self.confidence_score = confidence_score
         self.error = error
+        self.input_tokens = input_tokens
+        self.output_tokens = output_tokens
+        self.total_tokens = total_tokens
+        self.cost_usd = cost_usd
         self.timestamp = datetime.now()
         self.memory_usage_mb = self._get_memory_usage()
         self.cpu_usage_percent = self._get_cpu_usage()
@@ -77,6 +83,10 @@ class PerformanceMonitor:
             'cache_misses': 0,
             'total_response_time': 0.0,
             'errors': 0,
+            'total_input_tokens': 0,
+            'total_output_tokens': 0,
+            'total_tokens': 0,
+            'total_cost_usd': 0.0,
             'start_time': datetime.now().isoformat()
         }
     
@@ -95,7 +105,11 @@ class PerformanceMonitor:
                             response_time=item['response_time'],
                             cache_hit=item['cache_hit'],
                             confidence_score=item['confidence_score'],
-                            error=item.get('error')
+                            error=item.get('error'),
+                            input_tokens=item.get('input_tokens', 0),
+                            output_tokens=item.get('output_tokens', 0),
+                            total_tokens=item.get('total_tokens', 0),
+                            cost_usd=item.get('cost_usd', 0.0)
                         )
                         metrics.append(metric)
                     return metrics
@@ -133,11 +147,21 @@ class PerformanceMonitor:
             cache_hit = i % 3 == 0  # Some cache hits
             confidence = 0.7 + (i * 0.01)  # Varying confidence
             
+            # Generate sample token data
+            input_tokens = 50 + (i * 5)  # Varying input tokens
+            output_tokens = 100 + (i * 10)  # Varying output tokens
+            total_tokens = input_tokens + output_tokens
+            cost_usd = (input_tokens * 0.000075 + output_tokens * 0.0003) / 1000  # Gemini pricing
+            
             metric = QueryMetrics(
                 query=query,
                 response_time=response_time,
                 cache_hit=cache_hit,
-                confidence_score=min(confidence, 1.0)
+                confidence_score=min(confidence, 1.0),
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
+                total_tokens=total_tokens,
+                cost_usd=cost_usd
             )
             recent_metrics.append(metric)
         
@@ -167,6 +191,10 @@ class PerformanceMonitor:
                     'cache_hit': metric.cache_hit,
                     'confidence_score': metric.confidence_score,
                     'error': metric.error,
+                    'input_tokens': metric.input_tokens,
+                    'output_tokens': metric.output_tokens,
+                    'total_tokens': metric.total_tokens,
+                    'cost_usd': metric.cost_usd,
                     'timestamp': metric.timestamp.isoformat() if hasattr(metric, 'timestamp') else datetime.now().isoformat()
                 })
             
@@ -176,15 +204,33 @@ class PerformanceMonitor:
             logger.error(f"Error saving recent metrics: {e}")
     
     def record_query(self, query: str, response_time: float, cache_hit: bool, 
-                    confidence_score: float = 0.0, error: str = None):
+                    confidence_score: float = 0.0, error: str = None,
+                    input_tokens: int = 0, output_tokens: int = 0, total_tokens: int = 0,
+                    cost_usd: float = 0.0):
         """Record a query and its metrics."""
-        metric = QueryMetrics(query, response_time, cache_hit, confidence_score, error)
+        metric = QueryMetrics(query, response_time, cache_hit, confidence_score, error,
+                             input_tokens, output_tokens, total_tokens, cost_usd)
         self.recent_metrics.append(metric)
         self.response_times.append(response_time)
         
         # Update aggregated metrics
         self.metrics['total_queries'] += 1
         self.metrics['total_response_time'] += response_time
+        
+        # Initialize token metrics if they don't exist (for backward compatibility)
+        if 'total_input_tokens' not in self.metrics:
+            self.metrics['total_input_tokens'] = 0
+        if 'total_output_tokens' not in self.metrics:
+            self.metrics['total_output_tokens'] = 0
+        if 'total_tokens' not in self.metrics:
+            self.metrics['total_tokens'] = 0
+        if 'total_cost_usd' not in self.metrics:
+            self.metrics['total_cost_usd'] = 0.0
+        
+        self.metrics['total_input_tokens'] += input_tokens
+        self.metrics['total_output_tokens'] += output_tokens
+        self.metrics['total_tokens'] += total_tokens
+        self.metrics['total_cost_usd'] += cost_usd
         
         if cache_hit:
             self.metrics['cache_hits'] += 1
@@ -234,11 +280,25 @@ class PerformanceMonitor:
         avg_response_time = (self.metrics['total_response_time'] / total_queries) if total_queries > 0 else 0
         error_rate = (self.metrics['errors'] / total_queries * 100) if total_queries > 0 else 0
         
+        # Token metrics
+        total_input_tokens = self.metrics.get('total_input_tokens', 0)
+        total_output_tokens = self.metrics.get('total_output_tokens', 0)
+        total_tokens = self.metrics.get('total_tokens', 0)
+        total_cost = self.metrics.get('total_cost_usd', 0.0)
+        avg_tokens_per_query = (total_tokens / total_queries) if total_queries > 0 else 0
+        avg_cost_per_query = (total_cost / total_queries) if total_queries > 0 else 0
+        
         # Calculate recent performance
         recent_queries = list(self.recent_metrics)[-10:]  # Last 10 queries
         recent_avg_time = sum(m.response_time for m in recent_queries) / len(recent_queries) if recent_queries else 0
         recent_cache_hits = sum(1 for m in recent_queries if m.cache_hit)
         recent_cache_rate = (recent_cache_hits / len(recent_queries) * 100) if recent_queries else 0
+        
+        # Recent token metrics
+        recent_total_tokens = sum(m.total_tokens for m in recent_queries)
+        recent_avg_tokens = (recent_total_tokens / len(recent_queries)) if recent_queries else 0
+        recent_total_cost = sum(m.cost_usd for m in recent_queries)
+        recent_avg_cost = (recent_total_cost / len(recent_queries)) if recent_queries else 0
         
         # Determine status
         if error_rate > 10:
@@ -259,7 +319,16 @@ class PerformanceMonitor:
             'recent_avg_time': round(recent_avg_time, 2),
             'recent_cache_rate': round(recent_cache_rate, 1),
             'query_categories': dict(self.query_categories),
-            'top_errors': dict(sorted(self.error_counts.items(), key=lambda x: x[1], reverse=True)[:5])
+            'top_errors': dict(sorted(self.error_counts.items(), key=lambda x: x[1], reverse=True)[:5]),
+            # Token metrics
+            'total_input_tokens': total_input_tokens,
+            'total_output_tokens': total_output_tokens,
+            'total_tokens': total_tokens,
+            'total_cost_usd': round(total_cost, 4),
+            'avg_tokens_per_query': round(avg_tokens_per_query, 1),
+            'avg_cost_per_query': round(avg_cost_per_query, 4),
+            'recent_avg_tokens': round(recent_avg_tokens, 1),
+            'recent_avg_cost': round(recent_avg_cost, 4)
         }
     
     def get_system_health(self) -> Dict:

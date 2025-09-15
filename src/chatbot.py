@@ -67,7 +67,7 @@ class ConversationMemory:
 class GitLabChatbot:
     """Main chatbot class with LLM integration."""
     
-    def __init__(self, vector_store: VectorStore, api_key: str, model_type: str = "gemini"):
+    def __init__(self, vector_store: VectorStore, api_key: str, model_type: str = "gemini", cache_manager=None):
         """
         Initialize the chatbot.
         
@@ -75,77 +75,148 @@ class GitLabChatbot:
             vector_store: Vector store for document retrieval
             api_key: API key for the LLM
             model_type: Type of model ('gemini' or 'openai')
+            cache_manager: Cache manager for response caching
         """
         self.vector_store = vector_store
         self.retriever = AdvancedRetriever(vector_store)
         self.memory = ConversationMemory()
         self.model_type = model_type
+        self.cache_manager = cache_manager
         
-        # Configure LLM (Gemini only)
+        # Production settings
+        self.max_query_length = 500
+        self.request_count = 0
+        self.last_request_time = 0
+        
+        # Response templates for common questions (reduces API calls)
+        self.response_templates = {
+            "gitlab_overview": "GitLab is a complete DevOps platform that provides a single application for the entire software development lifecycle. We're a fully remote company with team members in over 65 countries. GitLab offers source code management, CI/CD, security scanning, project management, and more - all in one platform. Our core values are Results, Efficiency, Diversity, Iteration, and Transparency.",
+            "gitlab_values": "GitLab's core values are Results, Efficiency, Diversity, Iteration, and Transparency. These values guide everything we do, from how we work remotely to how we develop software. We believe in results over hours worked, efficiency through automation, diversity in all forms, iteration over perfection, and transparency in everything we do.",
+            "remote_work": "GitLab is a fully remote company with team members in over 65 countries. We believe in asynchronous communication, transparency, and results-oriented work. Our remote work culture emphasizes trust, clear documentation, and making work visible to everyone. We use GitLab itself for most of our work processes.",
+            "ci_cd_basics": "GitLab CI/CD is our built-in continuous integration and deployment tool. It uses YAML configuration files (.gitlab-ci.yml) to define pipelines that automatically build, test, and deploy your code. Pipelines run in stages (build, test, deploy) and can be triggered by commits, merge requests, or schedules.",
+            "hiring_process": "GitLab's hiring process is designed to be transparent and efficient. We use structured interviews, work samples, and cultural fit assessments. The process typically includes a phone screen, technical interview, and final interview with the hiring manager. We value diversity and inclusion in all our hiring decisions.",
+            "company_culture": "GitLab's culture is built on our values and our all-remote work model. We emphasize transparency, iteration, and results. Our handbook is public, our meetings are recorded, and we share our learnings openly. We believe in working asynchronously and making work visible to everyone."
+        }
+        
+        # Configure LLM (Gemini only) - using faster model
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        self.model = genai.GenerativeModel('gemini-1.5-flash', 
+                                         generation_config=genai.types.GenerationConfig(
+                                             max_output_tokens=256,  # Reduced from default
+                                             temperature=0.7,        # Slightly more focused
+                                             top_p=0.8,             # More focused responses
+                                             top_k=20               # Limit vocabulary
+                                         ))
         
         logger.info(f"Initialized GitLab chatbot with {model_type} model")
+    
+    def get_template_response(self, query: str) -> Optional[str]:
+        """Check if query matches a common template to avoid API calls."""
+        query_lower = query.lower().strip()
+        
+        # Check for basic "what is gitlab" questions FIRST (most common)
+        if any(phrase in query_lower for phrase in [
+            'what is gitlab', 'what is git lab', 'tell me about gitlab', 
+            'explain gitlab', 'describe gitlab', 'gitlab overview',
+            'what does gitlab do', 'gitlab company', 'about gitlab'
+        ]):
+            return self.response_templates["gitlab_overview"]
+        
+        # Check for values/culture questions
+        elif any(word in query_lower for word in ['values', 'culture', 'principles', 'what does gitlab believe']):
+            return self.response_templates["gitlab_values"]
+        
+        # Check for remote work questions
+        elif any(word in query_lower for word in ['remote', 'work from home', 'distributed', 'async']):
+            return self.response_templates["remote_work"]
+        
+        # Check for CI/CD questions
+        elif any(word in query_lower for word in ['ci/cd', 'pipeline', 'continuous integration', 'deploy']):
+            return self.response_templates["ci_cd_basics"]
+        
+        # Check for hiring questions
+        elif any(word in query_lower for word in ['hiring', 'interview', 'recruitment', 'how to get hired']):
+            return self.response_templates["hiring_process"]
+        
+        # Check for general culture questions
+        elif any(word in query_lower for word in ['company culture', 'how does gitlab work', 'what makes gitlab different']):
+            return self.response_templates["company_culture"]
+        
+        return None
     
     def create_prompt(self, query: str, context_docs: List[Dict], conversation_context: str = "") -> str:
         """Create a comprehensive prompt for the LLM."""
         
-        # Enhanced system prompt with persistent GitLab context
-        system_prompt = """You are GitLab's AI Assistant, an expert on GitLab's company culture, practices, policies, and procedures. 
-
-CRITICAL: Always assume the user is asking about GitLab unless explicitly stated otherwise. Treat all queries as GitLab-related and provide GitLab-specific context in your responses.
-
-Guidelines:
-1. Answer questions directly and naturally, as if you're a knowledgeable GitLab team member
-2. Give confident, complete answers about GitLab without mentioning sources or documentation
-3. Never reference "handbook," "documentation," "pages," "sources," or "provided information"
-4. Don't mention where information comes from - just state facts about GitLab
-5. Focus on what GitLab does, believes, and practices in a conversational way
-6. Use specific GitLab examples and practices naturally in your explanations
-7. For ambiguous queries, interpret them in the context of GitLab's products, culture, or processes
-8. Present information as your knowledge about GitLab, not as sourced material
-9. Always maintain GitLab context - if a question could relate to GitLab, answer it as such
-
-Your role: Share knowledge about GitLab in a natural, conversational way, always maintaining GitLab context."""
-
-        # Format context documents (hidden from user)
+        # Ultra-short system prompt (30 tokens max)
+        system_prompt = "You are GitLab's AI Assistant. Answer GitLab questions briefly."
+        
+        # Minimal context (100 chars max, 1 doc only)
         context_text = ""
         if context_docs:
-            context_text = "\n\nGitLab Information:\n"
-            for i, doc in enumerate(context_docs, 1):
-                content = doc['content'][:800]  # Limit content length
-                context_text += f"\n{content}...\n"
+            content = context_docs[0]['content'][:100]  # Only first doc, 100 chars max
+            context_text = f"\nContext: {content}"
         
-        # Include conversation context
-        conversation_part = ""
-        if conversation_context:
-            conversation_part = f"\n\nPrevious conversation:\n{conversation_context}\n"
-        
-        # Final prompt
-        prompt = f"""{system_prompt}
-{context_text}
-{conversation_part}
-
-User Question: {query}
-
-Answer naturally and conversationally about GitLab. Don't mention any sources, documentation, or where information comes from. Just share your knowledge about GitLab as if you're explaining to a colleague."""
+        # Ultra-short prompt (200 tokens total max)
+        prompt = f"{system_prompt}{context_text}\nQ: {query}\nA:"
 
         return prompt
     
-    def generate_response_gemini(self, prompt: str) -> str:
-        """Generate response using Gemini."""
+    def generate_response_gemini(self, prompt: str) -> tuple:
+        """Generate response using Gemini and return response with token usage."""
         try:
             response = self.model.generate_content(
                 prompt,
                 generation_config=genai.types.GenerationConfig(
                     temperature=0.7,
-                    max_output_tokens=1024,
+                    max_output_tokens=512,  # Reduced from 1024 to 512
                 )
             )
-            return response.text
+            
+            # Extract token usage information
+            input_tokens = 0
+            output_tokens = 0
+            total_tokens = 0
+            cost_usd = 0.0
+            
+            try:
+                # Try to get token usage from response metadata
+                if hasattr(response, 'usage_metadata'):
+                    input_tokens = getattr(response.usage_metadata, 'prompt_token_count', 0)
+                    output_tokens = getattr(response.usage_metadata, 'candidates_token_count', 0)
+                    total_tokens = getattr(response.usage_metadata, 'total_token_count', 0)
+                else:
+                    # Estimate token usage if metadata not available
+                    input_tokens = len(prompt.split()) * 1.3  # Rough estimation
+                    output_tokens = len(response.text.split()) * 1.3
+                    total_tokens = int(input_tokens + output_tokens)
+                
+                # Calculate cost based on Gemini pricing (as of 2024)
+                # Input: $0.075 per 1K tokens, Output: $0.30 per 1K tokens
+                cost_usd = (input_tokens * 0.000075 + output_tokens * 0.0003) / 1000
+                
+            except Exception as e:
+                logger.warning(f"Could not extract token usage: {e}")
+                # Fallback estimation
+                input_tokens = len(prompt.split()) * 1.3
+                output_tokens = len(response.text.split()) * 1.3
+                total_tokens = int(input_tokens + output_tokens)
+                cost_usd = (input_tokens * 0.000075 + output_tokens * 0.0003) / 1000
+            
+            return response.text, {
+                'input_tokens': int(input_tokens),
+                'output_tokens': int(output_tokens),
+                'total_tokens': int(total_tokens),
+                'cost_usd': cost_usd
+            }
+            
         except Exception as e:
             logger.error(f"Error generating Gemini response: {e}")
-            return "I apologize, but I'm having trouble generating a response right now. Please try again."
+            return "I apologize, but I'm having trouble generating a response right now. Please try again.", {
+                'input_tokens': 0,
+                'output_tokens': 0,
+                'total_tokens': 0,
+                'cost_usd': 0.0
+            }
     
     
     def is_gitlab_related(self, query: str) -> bool:
@@ -162,7 +233,7 @@ Answer naturally and conversationally about GitLab. Don't mention any sources, d
         # Be more permissive for short queries or ones that could relate to GitLab as a company
         return any(keyword in query_lower for keyword in gitlab_keywords) or len(query.split()) <= 4
     
-    def chat(self, query: str, use_context: bool = True) -> Tuple[str, List[Dict]]:
+    def chat(self, query: str, use_context: bool = True) -> Tuple[str, List[Dict], Dict]:
         """
         Main chat function with enhanced GitLab context enforcement.
         
@@ -171,9 +242,43 @@ Answer naturally and conversationally about GitLab. Don't mention any sources, d
             use_context: Whether to use conversation context
             
         Returns:
-            Tuple of (response, source_documents)
+            Tuple of (response, source_documents, token_info)
         """
         logger.info(f"Processing query: {query}")
+        
+        # Input validation
+        if not query or len(query.strip()) == 0:
+            return "Please provide a valid question.", [], {'input_tokens': 0, 'output_tokens': 0, 'total_tokens': 0, 'cost_usd': 0.0}
+        
+        if len(query) > self.max_query_length:
+            return f"Query too long. Please keep it under {self.max_query_length} characters.", [], {'input_tokens': 0, 'output_tokens': 0, 'total_tokens': 0, 'cost_usd': 0.0}
+        
+        # Basic rate limiting (simple implementation)
+        import time
+        current_time = time.time()
+        if current_time - self.last_request_time < 0.1:  # 100ms between requests
+            time.sleep(0.1)
+        self.last_request_time = current_time
+        self.request_count += 1
+        
+        # Check cache first (fastest path)
+        if self.cache_manager:
+            cached_response = self.cache_manager.get_cached_response(query)
+            if cached_response:
+                logger.info(f"Using cached response (type: {cached_response[3]})")
+                token_info = {'input_tokens': 0, 'output_tokens': 0, 'total_tokens': 0, 'cost_usd': 0.0}
+                return cached_response[0], cached_response[1], token_info
+        
+        # Quick template response check for common questions (fast path)
+        template_response = self.get_template_response(query)
+        if template_response:
+            logger.info("Using fast template response")
+            # Store in cache for future use
+            if self.cache_manager:
+                self.cache_manager.store_response(query, template_response, [], {'type': 'template'})
+            # Return immediately for speed
+            token_info = {'input_tokens': 0, 'output_tokens': 0, 'total_tokens': 0, 'cost_usd': 0.0}
+            return template_response, [], token_info
         
         # Enhanced GitLab context enforcement
         # Always assume GitLab context and rewrite query if needed
@@ -184,11 +289,18 @@ Answer naturally and conversationally about GitLab. Don't mention any sources, d
             response = self._get_gitlab_redirect_response(query)
             self.memory.add_message("user", query)
             self.memory.add_message("assistant", response)
-            return response, []
+            # Return empty token info for redirect responses
+            token_info = {
+                'input_tokens': 0,
+                'output_tokens': 0,
+                'total_tokens': 0,
+                'cost_usd': 0.0
+            }
+            return response, [], token_info
         
-        # Retrieve relevant documents using processed query
+        # Retrieve relevant documents using processed query (optimized for speed)
         try:
-            context_docs = self.retriever.retrieve_with_reranking(processed_query, final_results=3)
+            context_docs = self.retriever.retrieve_with_reranking(processed_query, final_results=1)  # Only 1 doc for speed
         except Exception as e:
             logger.error(f"Error retrieving documents: {e}")
             context_docs = []
@@ -199,8 +311,19 @@ Answer naturally and conversationally about GitLab. Don't mention any sources, d
         # Create prompt with enhanced GitLab context
         prompt = self.create_prompt(processed_query, context_docs, conversation_context)
         
-        # Generate response using Gemini
-        response = self.generate_response_gemini(prompt)
+        # Generate response using Gemini with retry logic
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                response, token_info = self.generate_response_gemini(prompt)
+                break
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    logger.error(f"Failed to generate response after {max_retries} attempts: {e}")
+                    return "I apologize, but I'm having trouble processing your request right now. Please try again.", [], {'input_tokens': 0, 'output_tokens': 0, 'total_tokens': 0, 'cost_usd': 0.0}
+                else:
+                    logger.warning(f"Attempt {attempt + 1} failed: {e}, retrying...")
+                    time.sleep(1)  # Wait before retry
         
         # Store in memory
         source_docs = [doc['metadata'] for doc in context_docs]
@@ -217,8 +340,16 @@ Answer naturally and conversationally about GitLab. Don't mention any sources, d
                 'source_url': metadata.get('url', '#')  # For compatibility
             })
         
+        # Store in cache for future use
+        if self.cache_manager:
+            self.cache_manager.store_response(query, response, formatted_sources, {
+                'type': 'ai_generated',
+                'context_docs_count': len(context_docs),
+                'token_info': token_info
+            })
+        
         logger.info(f"Generated response with {len(context_docs)} source documents")
-        return response, formatted_sources
+        return response, formatted_sources, token_info
     
     def get_follow_up_suggestions(self, query: str, response: str) -> List[str]:
         """Generate follow-up question suggestions."""
@@ -347,7 +478,7 @@ Answer naturally and conversationally about GitLab. Don't mention any sources, d
 
 What would you like to know about GitLab?"""
 
-def create_chatbot_from_config(config_path: str = "config.json") -> GitLabChatbot:
+def create_chatbot_from_config(config_path: str = "config.json", cache_manager=None) -> GitLabChatbot:
     """Create chatbot from configuration file."""
     # Default configuration
     default_config = {
@@ -371,11 +502,12 @@ def create_chatbot_from_config(config_path: str = "config.json") -> GitLabChatbo
     # Initialize vector store
     vector_store = VectorStore(persist_directory=config['vector_store_path'])
     
-    # Create chatbot
+    # Create chatbot with cache manager
     chatbot = GitLabChatbot(
         vector_store=vector_store,
         api_key=api_key,
-        model_type=config['model_type']
+        model_type=config['model_type'],
+        cache_manager=cache_manager
     )
     
     return chatbot
@@ -395,7 +527,7 @@ def main():
         
         for query in test_queries:
             print(f"\n🤖 User: {query}")
-            response, sources = chatbot.chat(query)
+            response, sources, token_info = chatbot.chat(query)
             print(f"🤖 Assistant: {response}")
             
             if sources:
